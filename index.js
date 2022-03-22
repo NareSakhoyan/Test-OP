@@ -1,10 +1,14 @@
+require('dotenv').config()
 const express = require('express')
-var bodyParser = require('body-parser');
-const fs = require("fs");
+const bodyParser = require('body-parser');
+
+
 const { getNotes, getNoteByID, createNote, deleteNote } = require('./queries')
-const PORT = 3000
+
+const PORT = process.env.SERVER_PORT
 
 const app = express()
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
