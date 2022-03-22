@@ -24,7 +24,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
   "/note",
   (request, response, next) => {
-    const token = request.headers.authorization.split(' ')[1];
+    const authorization = request.headers.authorization
+    const token = authorization? request.headers.authorization.split(' ')[1]: '';
     if (token) {
       jwt.verify(token, "LOLIPOP", function (err, decoded) {
         next();
