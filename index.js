@@ -1,7 +1,5 @@
-require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
-const jwt = require("jsonwebtoken");
 
 const {
   getNotes,
@@ -15,7 +13,7 @@ const {
 } = require("./queries");
 const { auth } = require("./middlewares");
 
-const PORT = process.env.SERVER_PORT;
+const {SERVER_PORT: PORT} = require('./configs')
 
 const app = express();
 

@@ -40,4 +40,10 @@ describe("Notes Endpoints", () => {
     expect(res.statusCode).toEqual(201);
     expect(res.body).toHaveProperty("title");
   });
+
+  it("should update the note", async () => {
+    const res = await request(app)
+      .get("/notes")
+    expect(res.statusCode).toEqual(200);
+  });
 });
