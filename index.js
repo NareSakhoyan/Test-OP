@@ -33,7 +33,7 @@ app.delete("/note/:id", auth, deleteNote);
 app.get("/", (req, res) => {
   res.status(200).send({
     message:
-      "If youdon't know how to use this API, then you should read the documentation",
+      "If you don't know how to use this API, then you should read the documentation",
   });
 });
 
