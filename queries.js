@@ -31,7 +31,7 @@ const getNoteByID = (request, response) => {
   const id = parseInt(request.params.id);
 
   pool.query(
-    "SELECT title, isDone FROM notes WHERE id = $1",
+    "SELECT title, isDone FROM notes WHERE id = $1 and status != 'deleted'",
     [id],
     (error, results) => {
       if (error) {
@@ -44,11 +44,21 @@ const getNoteByID = (request, response) => {
 };
 
 const createNote = (request, response) => {
-  const { title, idDone = false } = request.body;
+  const { title, isDone = false } = request.body;
 
+  //data validation
+  const errorsList = {"validation errors": []}
+  if (typeof(title) !== "string"  ) {
+    errorsList["validation errors"].push("title property should be string type")
+    if (!typeof(isDone) !== "boolean") {
+      errorsList["validation errors"].push("isDone property should be boolean type")
+    }
+    request.status(403).send(errorsList)
+    // throw error
+  }
   pool.query(
     "INSERT INTO notes (title, isDone) VALUES ($1, $2) RETURNING *",
-    [title, idDone],
+    [title, isDone],
     (error, results) => {
       if (error) {
         response.status(400).send({ error: error.message });
@@ -59,11 +69,68 @@ const createNote = (request, response) => {
   );
 };
 
+const updateNote = (request, response) => {
+  const id = parseInt(request.params.id);
+  const { title, isDone } = request.body;
+
+  pool.query(
+    "UPDATE notes SET title = $1, isDone = $2 WHERE id = $3 RETURNING *",
+    [title, isDone, id],
+    (error, results) => {
+      if (error) {
+        response.status(400).send({ error: error.message });
+        return;
+      }
+      response.status(201).send(results.rows[0]);
+    }
+  );
+};
+
+const archieveNote = (request, response) => {
+  const id = parseInt(request.params.id);
+
+  pool.query(
+    "UPDATE notes SET status = $1 WHERE id = $2 RETURNING *",
+    ["archieved", id],
+    (error, results) => {
+      if (error) {
+        response.status(400).send({ error: error.message });
+        return;
+      }
+      if (results.rowCount == 0) {
+        response.status(200).send({ message: "Not a note with specified id" });
+        return;
+      }
+      response.status(200).send(results.rows);
+    }
+  );
+};
+
 const deleteNote = (request, response) => {
   const id = parseInt(request.params.id);
 
   pool.query(
-    "DELETE FROM notes WHERE id = $1 RETURNING *",
+    "UPDATE notes SET status = $1 WHERE id = $2 RETURNING *",
+    ["deleted", id],
+    (error, results) => {
+      if (error) {
+        response.status(400).send({ error: error.message });
+        return;
+      }
+      if (results.rowCount == 0) {
+        response.status(200).send({ message: "N ot a note with specified id" });
+        return;
+      }
+      response.status(200).send(results.rows);
+    }
+  );
+};
+
+const permanentlyDeleteNote = (request, response) => {
+  const id = parseInt(request.params.id);
+
+  pool.query(
+    "DELETE FROM notes WHERE id = $3 RETURNING *",
     [id],
     (error, results) => {
       if (error) {
@@ -124,4 +191,6 @@ module.exports = {
   deleteNote,
   login,
   logout,
+  updateNote,
+  archieveNote,
 };
